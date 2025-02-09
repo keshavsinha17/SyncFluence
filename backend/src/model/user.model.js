@@ -30,8 +30,12 @@ const userSchema = new Schema(
         },
         userType: {
             type: String,
-            enum: ['creator', 'brand'],
-            default: 'user'
+            enum: ['brand', 'influencer'],
+            required: true
+        },
+        bio: {
+            type: String,
+            default: ""
         },
         password: {
             type: String,
