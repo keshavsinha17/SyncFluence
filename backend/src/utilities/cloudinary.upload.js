@@ -5,10 +5,16 @@ import dotenv from 'dotenv';
 // Load environment variables
 dotenv.config();
 
+// Add this console log to verify configuration
+console.log("Cloudinary Environment Variables:", {
+    cloud_name: process.env.CLOUDINARY_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY ? "Present" : "Missing",
+    api_secret: process.env.CLOUDINARY_API_SECRET ? "Present" : "Missing"
+});
+
 // Configuration
 cloudinary.config({
-    // cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    cloud_name:process.env.CLOUDINARY_NAME,
+    cloud_name: process.env.CLOUDINARY_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
@@ -20,7 +26,7 @@ cloudinary.config({
 //     api_secret: process.env.CLOUDINARY_API_SECRET ? "API Secret exists" : "API Secret missing"
 // });
 
-export const uploadFileOnCloudinary = async (localFilePath) => {
+const uploadOnCloudinary = async (localFilePath) => {
     try {
         if (!localFilePath) return null;
         
@@ -36,7 +42,7 @@ export const uploadFileOnCloudinary = async (localFilePath) => {
         });
         
         // File has been uploaded successfully
-        console.log("File uploaded successfully", response.url);
+        console.log("File uploaded successfully:", response.url);
         
         // Remove file from local storage
         fs.unlinkSync(localFilePath);
@@ -52,3 +58,5 @@ export const uploadFileOnCloudinary = async (localFilePath) => {
         return null;
     }
 }
+
+export { uploadOnCloudinary };

@@ -6,12 +6,17 @@ dotenv.config();
 import {asyncHandler} from "../utilities/AsyncHandler.js";
 import {ApiError} from "../utilities/ApiError.js";
 import {ApiResponse} from "../utilities/ApiResponse.js";
-
+import {uploadOnCloudinary} from "../utilities/cloudinary.upload.js";
 const registerUser = asyncHandler(async (req, res) => {
-    const { username, email, fullname, password, userType } = req.body;
+    const { username, email, fullname, password, userType, bio } = req.body;
 
     if (!username || !email || !fullname || !password || !userType) {
         throw new ApiError(400, "All fields are required");
+    }
+
+    // Check if avatar file exists
+    if (!req.file) {
+        throw new ApiError(400, "Avatar file is required");
     }
 
     // Validate userType
@@ -19,50 +24,49 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Invalid user type. Must be either 'brand' or 'influencer'");
     }
 
-    const existedUser = await User.findOne({
+    const userExists = await User.findOne({
         $or: [{ username }, { email }]
-    })
-    if (existedUser) {
-        throw new ApiError(400, "User already exists");
+    });
+
+    if (userExists) {
+        throw new ApiError(409, "User with email or username already exists");
     }
-    if(!req.file||!req.file.avatar){
-        throw new ApiError(400, "Avatar is required");
+
+    // Upload file to cloudinary
+    const avatarLocalPath = req.file?.path;
+    
+    if (!avatarLocalPath) {
+        throw new ApiError(400, "Avatar file is required");
     }
-    const avatarLocalPath = req.files?.avatar[0]?.path;
-    let avatar;
-    try {
-        avatar = await uploadFileOnCloudinary(avatarLocalPath);
-        console.log("Cloudinary avatar response:", avatar);
-    } catch (error) {
-        console.error("Cloudinary upload error:", error);
-        throw new ApiError(400, "Error uploading avatar to cloudinary");
-    }
+
+    const avatar = await uploadOnCloudinary(avatarLocalPath);
+
     if (!avatar) {
-        throw new ApiError(400, "Error while uploading avatar")
+        throw new ApiError(400, "Avatar file upload failed");
     }
+
     const user = await User.create({
-        fullname: fullname,
+        fullname,
         avatar: avatar.url,
-        userType: userType,
-        bio:bio||null,
         email,
         password,
-        username: username.toLowerCase()
-    })
+        username: username.toLowerCase(),
+        userType,
+        bio: bio || ""
+    });
 
     const createdUser = await User.findById(user._id).select(
-        "-password -refreshToken"
-    )
+        "-password"
+    );
 
     if (!createdUser) {
-        throw new ApiError(500, "Something went wrong while registering the user")
+        throw new ApiError(500, "Something went wrong while registering the user");
     }
 
     return res.status(201).json(
-        new ApiResponse(200, createdUser, "User registered Successfully")
-    )
-
-})
+        new ApiResponse(200, createdUser, "User registered successfully")
+    );
+});
 
 
 export{
