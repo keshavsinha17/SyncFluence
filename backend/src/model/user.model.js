@@ -26,17 +26,13 @@ const userSchema = new Schema(
         },
         avatar: {
             type: String,//Cloudinary
-            // required: true
+            required: true
         },
-        coverImage: {
+        userType: {
             type: String,
+            enum: ['creator', 'brand'],
+            default: 'user'
         },
-        watchHistory: [
-            {
-                type: Schema.Types.ObjectId,
-                ref: 'Video'
-            }
-        ],
         password: {
             type: String,
             required: [true || 'Password is required']
