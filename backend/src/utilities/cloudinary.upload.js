@@ -6,11 +6,11 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // Add this console log to verify configuration
-console.log("Cloudinary Environment Variables:", {
-    cloud_name: process.env.CLOUDINARY_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY ? "Present" : "Missing",
-    api_secret: process.env.CLOUDINARY_API_SECRET ? "Present" : "Missing"
-});
+// console.log("Cloudinary Environment Variables:", {
+//     cloud_name: process.env.CLOUDINARY_NAME,
+//     api_key: process.env.CLOUDINARY_API_KEY ? "Present" : "Missing",
+//     api_secret: process.env.CLOUDINARY_API_SECRET ? "Present" : "Missing"
+// });
 
 // Configuration
 cloudinary.config({
